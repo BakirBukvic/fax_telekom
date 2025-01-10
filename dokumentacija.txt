@@ -1,0 +1,28 @@
+Klase:
+
+User klasa:
+
+Privatne varijable za koristenje: username_, id_. 
+
+Public:
+Konstruktor:
+      * Omogucen je tip User sa parametrima username i id. User user ("bakir","123")
+      * ID je tip string zbog buduceg koristenja "Slug" umjesto obicnih int brojeva
+
+Getters:
+    * uz .get[Ime varijable] se moze dobiti svaka varijabla koja je definisana u konstruktoru. Nema nista skriveno od gettera
+
+Setteri:
+    * omoguceno uz set[Ime varijable] da se direktno assignuje vrijednost, bez da se pravi citav novi objekt
+
+
+
+
+
+
+
+
+
+
+
+
