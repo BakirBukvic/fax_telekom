@@ -1,21 +1,36 @@
-Klase:
+Klasa Telecom_operater:
 
-User klasa:
+Svrha:
+- Predstavlja telekom operatera koji upravlja korisnicima
+- Omogućava pohranu i upravljanje vezama između operatera i korisnika
 
-Privatne varijable za koristenje: username_, id_. 
+Konstruktori:
+- Default konstruktor: stvara prazan objekt operatera
+- Parametrizirani konstruktor: prima korisničko ime i ID za inicijalizaciju operatera
+  Primjer: Telecom_operater op("HTEronet", "ht001")
 
-Public:
-Konstruktor:
-      * Omogucen je tip User sa parametrima username i id. User user ("bakir","123")
-      * ID je tip string zbog buduceg koristenja "Slug" umjesto obicnih int brojeva
-
-Getters:
-    * uz .get[Ime varijable] se moze dobiti svaka varijabla koja je definisana u konstruktoru. Nema nista skriveno od gettera
+Getteri:
+- getUsername(): vraća korisničko ime operatera
+- getId(): vraća ID operatera
+- getUsers(): vraća vektor pokazivača na sve korisnike povezane s operaterom
 
 Setteri:
-    * omoguceno uz set[Ime varijable] da se direktno assignuje vrijednost, bez da se pravi citav novi objekt
+- setUsername(string): postavlja novo korisničko ime
+- setId(string): postavlja novi ID
 
+Metode za upravljanje korisnicima:
+- addUser(User*): dodaje novog korisnika u listu korisnika operatera
+- removeUser(User*): uklanja korisnika iz liste korisnika operatera
 
+Privatni članovi:
+- username_: string koji pohranjuje korisničko ime operatera
+- id_: string koji pohranjuje jedinstveni identifikator operatera
+- users_: vektor pokazivača na korisnike koji pripadaju ovom operateru
+
+Napomene:
+- ID je implementiran kao string radi fleksibilnosti i mogućnosti korištenja "slug" formata
+- Veza između operatera i korisnika je tipa jedan-prema-više (one-to-many)
+- Koriste se pokazivači na korisnike radi efikasnosti i izbjegavanja kopiranja objekata
 
 
 
