@@ -3,6 +3,7 @@
 #include <algorithm> 
 #include <random>
 #include <chrono>
+#include <iostream>
 
 
 const int NUMBER_OF_STATUSES = 3; 
@@ -40,7 +41,7 @@ public:
         // zasto sve ovo? jer mora napraviti novi seed. Ako se kompajlira programr broj ce uvijek biti isti
         // ovaj kod uzme trenutno vrijeme i onda taj borj sluzi kao seed.
         // bez ovog su uvijek isti brojevi
-        
+
         random_device rd;
         mt19937 gen(rd() + chrono::steady_clock::now().time_since_epoch().count());
         uniform_int_distribution<> dis(0, 1);
@@ -180,5 +181,224 @@ inline void User::setOperator(Telecom_operater* op) {
         op->addUser(this);
     }
 }
+
+
+
+
+
+class Terminal {
+
+
+
+public:
+    Terminal() : current_operator_(nullptr) {}
+
+
+    // main loop
+
+
+    void run() {
+        int choice;
+        bool logged_in = false;
+
+        // login forced
+        while (!logged_in) {
+            displayLoginMenu();
+            cin >> choice;
+            
+            switch(choice) {
+                case 1: 
+                    createOperator(); 
+                    break;
+                case 2: 
+                    logged_in = login(); 
+                    break;
+                case 0: 
+                    cout << "Exiting...\n"; 
+                    return;
+                default: 
+                    cout << "Invalid choice.\n";
+            }
+        }   
+
+        // main menu
+        while (true) {
+            displayMainMenu();
+            cin >> choice;
+            
+            switch(choice) {
+                case 1: createUser(); break;
+                case 2: displayUsers(); break;
+                case 3: manageStatuses(); break;
+                case 4: 
+                    cout << "Logging out...\n";
+                    return;
+                default: 
+                    cout << "Invalid choice.\n";
+            }
+        }
+    }
+
+
+    void printOperatorName() const{
+        cout<<"Operator: "<< current_operator_->getUsername();
+        cout<<"    "<<"ID: "<<current_operator_->getId()<<endl;
+
+
+    }
+
+
+    bool login() {
+        string id;
+        cout << "Enter operator ID: ";
+        cin >> id;
+        
+        current_operator_ = findOperator(id);
+        if(current_operator_) {
+            cout << "Logged in as: " << current_operator_->getUsername() << "\n";
+            return true;
+        }
+        cout << "Login failed.\n";
+        return false;
+    }
+
+    void createOperator() {
+        string username, id;
+        cout << "Enter operator username: ";
+        cin >> username;
+        cout << "Enter operator ID: ";
+        cin >> id;
+        
+        operators_.push_back(new Telecom_operater(username, id));
+        cout << "Operator created successfully.\n";
+    }
+
+    void createUser() {
+        system("cls");
+        if (current_operator_)printOperatorName();
+        else cout<<"How did you get here withouth logging in?";
+        string name, id;
+        cout << "Enter user name: ";
+        cin >> name;
+        cout << "Enter user ID: ";
+        cin >> id;
+        
+        users_.push_back(new User(name, id, current_operator_));
+        cout << "User created successfully.\n";
+    }
+
+    void displayUsers() const {
+        system("cls");
+        
+        if (current_operator_){
+            printOperatorName();}
+        else cout<<"How did you get here withouth logging in?";
+        int x;
+        cout << "\n=== Users List for Operator " << current_operator_->getUsername() << " ===\n";
+        for(const auto user : current_operator_->getUsers()) {
+            cout << "ID: " << user->getId() 
+                 << " | Name: " << user->getName() << "\n";
+        }
+        cout<<endl;
+
+        cout<< "enter any value to continue"<<endl;
+        cin >> x;
+
+            }
+
+    void manageStatuses() {
+        system("cls");
+        if (current_operator_)printOperatorName();
+        else cout<<"How did you get here withouth logging in?";
+        string id;
+        cout << "Enter user ID: ";
+        cin >> id;
+        
+        auto user = findUser(id);
+       if(user && user->getOperator() == current_operator_) {
+        int choice;
+        do {
+            system("cls");
+            printOperatorName();
+            cout << "\nUser: " << user->getName() << "\n\n";
+            
+            // Print status table
+            cout << "=====================================\n";
+            cout << "Status 1 | Status 2 | Status 3\n";
+            cout << "=====================================\n";
+            cout << "   " << user->getStatus(0)->getStatus1() 
+                 << "     |    " << user->getStatus(1)->getStatus1()
+                 << "     |    " << user->getStatus(2)->getStatus1() << "\n";
+            cout << "=====================================\n\n";
+            
+            cout << "1-3. Switch Status\n";
+            cout << "0. Exit to Main Menu\n";
+            cout << "Choice: ";
+            cin >> choice;
+            
+            if(choice >= 1 && choice <= 3) {
+                user->getStatus(choice-1)->switchStatus(1);
+            }
+        } while(choice != 0);
+        
+        cout << "\nPress any key to continue...";
+        cin.ignore();
+        cin.get();
+
+
+
+        } else {
+            cout << "User not found or unauthorized.\n";
+        }
+    }
+
+    ~Terminal() {
+        for(auto user : users_) delete user;
+        for(auto op : operators_) delete op;
+    }
+
+
+
+
+
+
+private:
+    vector<User*> users_;
+    vector<Telecom_operater*> operators_;
+    Telecom_operater* current_operator_;
+    
+    Telecom_operater* findOperator(const string& id) {
+        for(auto op : operators_)
+            if(op->getId() == id) return op;
+        return nullptr;
+    }
+    
+    User* findUser(const string& id) {
+        for(auto user : users_)
+            if(user->getId() == id) return user;
+        return nullptr;
+    }
+    
+    void displayLoginMenu() const {
+        cout << "\n=== Login Menu ===\n"
+             << "1. Create Operator\n"
+             << "2. Login\n"
+             << "0. Exit\n"
+             << "Choice: ";
+    }
+
+    void displayMainMenu() const {
+        system("cls");
+        if (current_operator_)printOperatorName();
+        else cout<<"How did you get here withouth logging in?";
+       
+        cout << "\n=== Main Menu ===\n"
+             << "1. Create User\n"
+             << "2. Display Users\n"
+             << "3. Manage Statuses\n"
+             << "4. Logout\n"
+             << "Choice: ";
+    }
+};
 
 
