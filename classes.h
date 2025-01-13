@@ -127,8 +127,9 @@ public:
     // koristi pointer da direktno uzme operatera na kojeg je assigned ovaj specifican user
 
     // mora projveriti postoji lli uopste operater, ako postoji koristi addUser, add user ocekuje usera, u ovom slucaju to je "this(ovaj specifican objekat)"
-    User(const string& name, const string& id, Telecom_operater* operater)
-        : name_(name), id_(id), operator_(operater) {
+    User(const string& name, Telecom_operater* operater)
+        : name_(name), operator_(operater) {
+        id_ = "USER" + to_string(++next_id_);
         if (operater) operater->addUser(this);
         // Initialize with 3 default statuses
 
@@ -166,6 +167,7 @@ private:
     string id_;
     Telecom_operater* operator_;
     vector<Status*> statuses_;
+    static int next_id_;
 };
 
 
@@ -302,10 +304,10 @@ public:
         string name, id;
         cout << "Enter user name: ";
         cin >> name;
-        cout << "Enter user ID: ";
-        cin >> id;
         
-        users_.push_back(new User(name, id, current_operator_));
+        
+        users_.push_back(new User(name, current_operator_));
+
         cout << "User created successfully.\n";
     }
 
