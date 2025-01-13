@@ -3,16 +3,10 @@
 using namespace std;
 
 
-int main() {
+int Telecom_operater::next_id_ = 0;
 
-    
-    try {
-        Terminal terminal;
-        terminal.run();
-    }
-    catch (const std::exception& e) {
-        cerr << "Error: " << e.what() <<endl;
-        return 1;
-    }
+int main() {
+    Terminal terminal;
+    terminal.run();
     return 0;
 }

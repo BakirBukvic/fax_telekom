@@ -4,14 +4,14 @@
 #include <random>
 #include <chrono>
 #include <iostream>
-
+#include <functional>
 
 const int NUMBER_OF_STATUSES = 3; 
 using namespace std;
 
 
 class User;  
-class Status;  // Add this
+class Status;  
 class Telecom_operater;
 
 using std::string;
@@ -77,16 +77,31 @@ private:
 
 
 
-
 class Telecom_operater {
 public:
 
     Telecom_operater() = default;
-    Telecom_operater(const string& username, const string& id) 
-        : username_(username), id_(id) {}
+
+
+    Telecom_operater(const string& username, const string& password) 
+        : username_(username) {
+        id_ = "OP" + to_string(++next_id_); // napravi OP pa bro sledeci u inkrementaciji
+        password_hash_ = hashPassword(password);
+    }
+
 
     string getUsername() const { return username_; }
     string getId() const { return id_; }
+
+    // size_t garantuje da ce objekat imati dovoljno prostora u memoriji
+    size_t hashPassword(const string& password) const {
+        return hash<string>{}(password);
+    }
+
+    bool checkPassword(const string& input_password) const {
+        return hashPassword(input_password) == password_hash_;
+    }
+
 
     void setUsername(const string& username) { username_ = username; }
     void setId(const string& id) { id_ = id; }
@@ -97,9 +112,11 @@ public:
     const vector<User*>& getUsers() const { return users_; }
 
 private:
+    static int next_id_;
     string username_;
     string id_;
     vector<User*> users_;  // sacuva pointer na usere, da ne cuva dirketno citave objekte, previse memorije uzima
+    size_t password_hash_; 
 };
 
 class User {
@@ -247,31 +264,36 @@ public:
 
     }
 
-
     bool login() {
-        string id;
-        cout << "Enter operator ID: ";
-        cin >> id;
-        
-        current_operator_ = findOperator(id);
-        if(current_operator_) {
-            cout << "Logged in as: " << current_operator_->getUsername() << "\n";
-            return true;
+            string id, password;
+            cout << "Enter operator ID: ";
+            cin >> id;
+            cout << "Enter password: ";
+            cin >> password;
+            
+            current_operator_ = findOperator(id);
+            if(current_operator_ && current_operator_->checkPassword(password)) {
+                cout << "Logged in as: " << current_operator_->getUsername() << "\n";
+                return true;
+            }
+            cout << "Login failed.\n";
+            return false;
         }
-        cout << "Login failed.\n";
-        return false;
-    }
 
     void createOperator() {
-        string username, id;
-        cout << "Enter operator username: ";
-        cin >> username;
-        cout << "Enter operator ID: ";
-        cin >> id;
-        
-        operators_.push_back(new Telecom_operater(username, id));
-        cout << "Operator created successfully.\n";
-    }
+                string username, id, password;
+                cout << "Enter operator username: ";
+                cin >> username;
+
+                cout << "Enter operator password: ";
+                cin >> password;
+                
+                auto new_operator = new Telecom_operater(username, password);
+                operators_.push_back(new_operator);
+
+
+                cout << "Operator created successfully with ID: " << new_operator->getId() << endl;
+                }
 
     void createUser() {
         system("cls");
