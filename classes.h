@@ -220,14 +220,15 @@ public:
 
     // main loop
 
-
-    void run() {
-        int choice;
+void run() {
+    while(true) {  
         bool logged_in = false;
-
-        // login forced
+        
+        //login
         while (!logged_in) {
+            system("cls");
             displayLoginMenu();
+            int choice;
             cin >> choice;
             
             switch(choice) {
@@ -239,15 +240,16 @@ public:
                     break;
                 case 0: 
                     cout << "Exiting...\n"; 
-                    return;
+                    return;  // Exit program
                 default: 
                     cout << "Invalid choice.\n";
             }
         }   
 
-        // main menu
-        while (true) {
+        //main menu
+        while (logged_in) {
             displayMainMenu();
+            int choice;
             cin >> choice;
             
             switch(choice) {
@@ -256,12 +258,16 @@ public:
                 case 3: manageStatuses(); break;
                 case 4: 
                     cout << "Logging out...\n";
-                    return;
+                    logged_in = false;  // Return to login menu
+                    current_operator_ = nullptr;
+                    system("pause");
+                    break;
                 default: 
                     cout << "Invalid choice.\n";
             }
         }
     }
+}
 
 
     void printOperatorName() const{
