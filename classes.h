@@ -125,7 +125,7 @@ public:
     // konstruktor. omogucava one to many relationship sa operaterima. Svkai user ima operatera, svkai operater ima vise usera
     User() = default;
     // koristi pointer da direktno uzme operatera na kojeg je assigned ovaj specifican user
-
+    
     // mora projveriti postoji lli uopste operater, ako postoji koristi addUser, add user ocekuje usera, u ovom slucaju to je "this(ovaj specifican objekat)"
     User(const string& name, Telecom_operater* operater)
         : name_(name), operator_(operater) {
@@ -139,6 +139,8 @@ public:
         }
     }
 
+    // setter sluzi za editovanje
+    void setName(const string& name) { name_ = name; }
 
 // destruktor. Ako se izbrise user, izbrisi i asocirane statuse. preventira memory leak :)
     ~User() {
@@ -161,6 +163,9 @@ public:
     }
 
     void setOperator(Telecom_operater* op);
+  
+
+
 
 private:
     string name_;
@@ -290,6 +295,8 @@ public:
         }
 
 
+
+// helper
 bool isOperatorUsernameTaken(const string& username) const {
         for(const auto& op : operators_) {
             if(op->getUsername() == username) {
@@ -341,24 +348,127 @@ bool isOperatorUsernameTaken(const string& username) const {
         cout << "User created successfully.\n";
     }
 
-    void displayUsers() const {
-        system("cls");
-        
-        if (current_operator_){
-            printOperatorName();}
-        else cout<<"How did you get here withouth logging in?";
-        int x;
-        cout << "\n=== Users List for Operator " << current_operator_->getUsername() << " ===\n";
-        for(const auto user : current_operator_->getUsers()) {
-            cout << "ID: " << user->getId() 
-                 << " | Name: " << user->getName() << "\n";
-        }
-        cout<<endl;
 
-        cout<< "enter any value to continue"<<endl;
-        cin >> x;
+
+
+void findUserById() {
+        string id;
+        cout << "Enter user ID: ";
+        cin >> id;
+        
+        auto user = findUser(id);
+        if(user) {
+            cout << "\nFound user:\n"
+                 << "ID: " << user->getId() 
+                 << " | Name: " << user->getName() << "\n";
+        } else {
+            cout << "User not found.\n";
+        }
+        cout << "\nPress Enter to continue...";
+        cin.ignore();
+        cin.get();
+    }
+
+    void editUser() {
+        string id;
+        cout << "Enter user ID: ";
+        cin >> id;
+        
+        auto user = findUser(id);
+        if(user) {
+            string newName;
+            cout << "Enter new name: ";
+            cin >> newName;
+            user->setName(newName);
+            cout << "User updated successfully.\n";
+        } else {
+            cout << "User not found.\n";
+        }
+        cout << "\nPress Enter to continue...";
+        cin.ignore();
+        cin.get();
+    }
+void deleteUser() {
+    string id;
+    cout << "Enter user ID: ";
+    cin >> id;
+    
+    auto it = find_if(users_.begin(), users_.end(),
+        [&id](const User* u) { return u->getId() == id; });
+            
+    if(it != users_.end()) {
+        User* user = *it;
+
+        // ukloni sa liste operatora, da ne bi crashalo
+        Telecom_operater* op = user->getOperator();
+        if (op) {
+            op->removeUser(user);
+        }
+
+        // obrisi instancu usera
+        delete user;
+
+        // obrisi sa terminala
+        users_.erase(it);
+
+        cout << "User deleted successfully.\n";
+    } else {
+        cout << "User not found.\n";
+    }
+    cout << "\nPress Enter to continue...";
+    cin.ignore();
+    cin.get();
+}
+
+
+
+
+     void displayUsers() {
+        while(true) {
+            system("cls");
+            if (current_operator_) {
+                printOperatorName();
+            } else {
+                cout << "How did you get here without logging in?";
+                return;
+            }
+
+            cout << "\n=== Users List for Operator " << current_operator_->getUsername() << " ===\n";
+
+            if (current_operator_->getUsers().empty()){
+                cout<<"No users found \n";
+
 
             }
+            else{
+                  for(const auto user : current_operator_->getUsers()) {
+                cout << "ID: " << user->getId() 
+                     << " | Name: " << user->getName() << "\n";
+            }
+
+            }
+          
+            cout << endl;
+
+            cout << "=== User Management ===\n"
+                 << "1. Find User\n"
+                 << "2. Edit User\n"
+                 << "3. Delete User\n"
+                 << "0. Back to Main Menu\n"
+                 << "Choice: ";
+
+            int choice;
+            cin >> choice;
+
+            switch(choice) {
+                case 1: findUserById(); break;
+                case 2: editUser(); break;
+                case 3: deleteUser(); break;
+                case 0: return;
+                default: cout << "Invalid choice\n";
+            }
+        }
+    }
 
     void manageStatuses() {
         system("cls");
@@ -376,7 +486,7 @@ bool isOperatorUsernameTaken(const string& username) const {
             printOperatorName();
             cout << "\nUser: " << user->getName() << "\n\n";
             
-            // Print status table
+            
             cout << "=====================================\n";
             cout << "Status 1 | Status 2 | Status 3\n";
             cout << "=====================================\n";
@@ -448,7 +558,7 @@ private:
        
         cout << "\n=== Main Menu ===\n"
              << "1. Create User\n"
-             << "2. Display Users\n"
+             << "2. User Managment\n"
              << "3. Manage Statuses\n"
              << "4. Logout\n"
              << "Choice: ";
