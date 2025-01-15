@@ -266,12 +266,19 @@ public:
 
     }
 
+
+  
+
+
+
     bool login() {
             string id, password;
             cout << "Enter operator ID: ";
             cin >> id;
             cout << "Enter password: ";
             cin >> password;
+
+           
             
             current_operator_ = findOperator(id);
             if(current_operator_ && current_operator_->checkPassword(password)) {
@@ -282,14 +289,35 @@ public:
             return false;
         }
 
+
+bool isOperatorUsernameTaken(const string& username) const {
+        for(const auto& op : operators_) {
+            if(op->getUsername() == username) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+
+
     void createOperator() {
                 string username, id, password;
                 cout << "Enter operator username: ";
                 cin >> username;
 
+            // ne da dalje ako username vec postoji
+                if(isOperatorUsernameTaken(username)) {
+            cout << "Error: Username '" << username << "' is already taken.\n";
+            return;
+        }
+
+
                 cout << "Enter operator password: ";
                 cin >> password;
                 
+
                 auto new_operator = new Telecom_operater(username, password);
                 operators_.push_back(new_operator);
 
@@ -304,6 +332,8 @@ public:
         string name, id;
         cout << "Enter user name: ";
         cin >> name;
+
+       
         
         
         users_.push_back(new User(name, current_operator_));
